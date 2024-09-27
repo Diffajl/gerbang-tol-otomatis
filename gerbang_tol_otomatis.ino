@@ -12,7 +12,8 @@ Servo servo;
 int angle = 10;
 long duration;
 int distance;
-bool buzzerPlayed = false; 
+bool buzzerPlayed = false;
+bool yellowPhaseComplete = false; 
 
 void setup() {
   Serial.begin(9600);
@@ -22,7 +23,7 @@ void setup() {
   pinMode(ledRed, OUTPUT);
   pinMode(ledYellow, OUTPUT);
   pinMode(ledGreen, OUTPUT);
-  servo.attach(servoPin);
+  servo.attach(servoPin); 
 }
 
 void loop() {
@@ -41,30 +42,33 @@ void loop() {
 
   if (distance < 10) {
     digitalWrite(ledRed, LOW);
-    digitalWrite(ledYellow, HIGH);
-    delay(500);
-    digitalWrite(ledYellow, LOW);
+
+    if (!yellowPhaseComplete) {
+      digitalWrite(ledYellow, HIGH);
+      delay(500);  
+      digitalWrite(ledYellow, LOW);
+      
+      yellowPhaseComplete = true;
+    }
+
     digitalWrite(ledGreen, HIGH);
+    
     servo.write(35);
 
     if (!buzzerPlayed) {
-      tone(buzzer, 1000, 100); // Durasi 100 ms
-      buzzerPlayed = true; // Tandai bahwa buzzer sudah berbunyi
+      tone(buzzer, 1000, 100);
+      buzzerPlayed = true;
     }
     delay(2000);
     
-  // } else if (distance < 70) {
-  //   // Kondisi jarak antara 10 cm - 50 cm (Lampu kuning menyala)
-  //   digitalWrite(ledYellow, HIGH);
-  //   digitalWrite(ledRed, LOW);
-  //   digitalWrite(ledGreen, LOW);
-  //   buzzerPlayed = false; // Reset flag ketika keluar dari kondisi hijau
   } else {
-    // Kondisi jarak lebih dari 50 cm (Lampu merah menyala)
-    servo.write(130); // Menggerakkan servo ke 180 derajat
+    servo.write(130); 
+
     digitalWrite(ledGreen, LOW);
-    digitalWrite(ledYellow, LOW);
+    digitalWrite(ledYellow, LOW);  
     digitalWrite(ledRed, HIGH);
-    buzzerPlayed = false; // Reset flag ketika keluar dari kondisi hijau
+
+    buzzerPlayed = false;
+    yellowPhaseComplete = false;
   }
 }
